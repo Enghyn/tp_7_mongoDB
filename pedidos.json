@@ -1,0 +1,122 @@
+[
+  {
+    "_id": {"$numberLong": "1"},
+    "id_cliente": {"$numberLong": "1"},
+    "fecha_pedido": {"$date": "2026-01-10T10:00:00Z"},
+    "estado": "CONFIRMADO",
+    "forma_pago": "EFECTIVO",
+    "lineas": [
+      {
+        "id_producto": {"$numberLong": "1"},
+        "cantidad": 2,
+        "precio_unitario_facturado": {"$numberDecimal": "500.00"},
+        "subtotal": {"$numberDecimal": "1000.00"}
+      },
+      {
+        "id_producto": {"$numberLong": "2"},
+        "cantidad": 1,
+        "precio_unitario_facturado": {"$numberDecimal": "1200.50"},
+        "subtotal": {"$numberDecimal": "1200.50"}
+      }
+    ],
+    "total_lineas": 2,
+    "total_unidades": 3,
+    "monto_total": {"$numberDecimal": "2200.50"}
+  },
+  {
+    "_id": {"$numberLong": "2"},
+    "id_cliente": {"$numberLong": "2"},
+    "fecha_pedido": {"$date": "2026-01-11T11:30:00Z"},
+    "estado": "ENTREGADO",
+    "forma_pago": "TARJETA",
+    "lineas": [
+      {
+        "id_producto": {"$numberLong": "3"},
+        "cantidad": 4,
+        "precio_unitario_facturado": {"$numberDecimal": "350.00"},
+        "subtotal": {"$numberDecimal": "1400.00"}
+      }
+    ],
+    "total_lineas": 1,
+    "total_unidades": 4,
+    "monto_total": {"$numberDecimal": "1400.00"}
+  },
+  {
+    "_id": {"$numberLong": "3"},
+    "id_cliente": {"$numberLong": "1"},
+    "fecha_pedido": {"$date": "2026-01-12T14:15:00Z"},
+    "estado": "PENDIENTE",
+    "forma_pago": "TRANSFERENCIA",
+    "lineas": [
+      {
+        "id_producto": {"$numberLong": "1"},
+        "cantidad": 1,
+        "precio_unitario_facturado": {"$numberDecimal": "500.00"},
+        "subtotal": {"$numberDecimal": "500.00"}
+      },
+      {
+        "id_producto": {"$numberLong": "4"},
+        "cantidad": 2,
+        "precio_unitario_facturado": {"$numberDecimal": "850.00"},
+        "subtotal": {"$numberDecimal": "1700.00"}
+      },
+      {
+        "id_producto": {"$numberLong": "5"},
+        "cantidad": 1,
+        "precio_unitario_facturado": {"$numberDecimal": "200.00"},
+        "subtotal": {"$numberDecimal": "200.00"}
+      }
+    ],
+    "total_lineas": 3,
+    "total_unidades": 4,
+    "monto_total": {"$numberDecimal": "2400.00"}
+  },
+  {
+    "_id": {"$numberLong": "4"},
+    "id_cliente": {"$numberLong": "3"},
+    "fecha_pedido": {"$date": "2026-01-13T16:45:00Z"},
+    "estado": "CONFIRMADO",
+    "forma_pago": "EFECTIVO",
+    "lineas": [
+      {
+        "id_producto": {"$numberLong": "2"},
+        "cantidad": 2,
+        "precio_unitario_facturado": {"$numberDecimal": "1200.50"},
+        "subtotal": {"$numberDecimal": "2401.00"}
+      },
+      {
+        "id_producto": {"$numberLong": "6"},
+        "cantidad": 3,
+        "precio_unitario_facturado": {"$numberDecimal": "150.00"},
+        "subtotal": {"$numberDecimal": "450.00"}
+      }
+    ],
+    "total_lineas": 2,
+    "total_unidades": 5,
+    "monto_total": {"$numberDecimal": "2851.00"}
+  },
+  {
+    "_id": {"$numberLong": "5"},
+    "id_cliente": {"$numberLong": "2"},
+    "fecha_pedido": {"$date": "2026-01-14T09:20:00Z"},
+    "estado": "ENTREGADO",
+    "forma_pago": "TARJETA",
+    "lineas": [
+      {
+        "id_producto": {"$numberLong": "5"},
+        "cantidad": 5,
+        "precio_unitario_facturado": {"$numberDecimal": "200.00"},
+        "subtotal": {"$numberDecimal": "1000.00"}
+      },
+      {
+        "id_producto": {"$numberLong": "3"},
+        "cantidad": 2,
+        "precio_unitario_facturado": {"$numberDecimal": "350.00"},
+        "subtotal": {"$numberDecimal": "700.00"}
+      }
+    ],
+    "total_lineas": 2,
+    "total_unidades": 7,
+    "monto_total": {"$numberDecimal": "1700.00"}
+  }
+]
