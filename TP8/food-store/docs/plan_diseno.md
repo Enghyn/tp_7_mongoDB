@@ -1,4 +1,4 @@
-# Plan de diseño — TP8 Food Store (Unidad 8)
+﻿# Plan de diseño — TP8 Food Store (Unidad 8)
 
 > **Materia:** Base de Datos II — Tecnicatura Universitaria en Programación
 > **Proyecto:** Food Store — cierre de la capa de datos (PostgreSQL + MongoDB + SQLite)
@@ -115,11 +115,12 @@ El esquema PostgreSQL de referencia es `TP8/schema.sql` (copia fiel del proyecto
 | 1 | 1.a | Tabla de datos que viajan + justificación | No | ✅ |
 | 2 | 1.b | `schema_sqlite.sql` con 4 tablas `STRICT` | No | ✅ |
 | 3 | 1.c | `pruebas_sqlite.sql` (C1, C7, COMMIT/ROLLBACK) | No | ✅ 55/55 |
-| 4 | 2.a | `v_snapshot_movil` + CSV + carga de `producto_cache` | **Sí** | Pendiente |
-| 5 | 2.b | `semaforo.sql` | Parcial (se prueba con CSV sintético) | Pendiente |
-| 6 | 2.c | Casos C2–C6 + consulta final de no modificación | **Sí** | Pendiente |
-| 7 | 3.a–3.c | Mapa, mantenimiento y code review | Parcial | Pendiente |
-| 8 | 4.a–4.c | Kiro, bitácora, DUIA, README y defensa | No | Pendiente |
+| 4 | 2.a | `v_snapshot_movil` + CSV + carga de `producto_cache` | **Sí** | ✅ |
+| 5 | 2.b | `semaforo.sql` | Parcial (se prueba con CSV sintético) | ✅ |
+| 6 | 2.c | Casos C2–C6 + consulta final de no modificación | **Sí** | ✅ |
+| 7 | 3.a-3.c | Mapa, mantenimiento y code review | Parcial | ✅ |
+| 8 | 4.a-4.c | Kiro, bitácora, DUIA, README y defensa | No | En progreso |
+| 9 | Integracion | Unificar TP7 + TP8 (carpeta integrado/) | No | Pendiente |
 
 Mientras no haya acceso a PostgreSQL se avanza con las fases 1–3, 5 (con CSV sintético) y 8. Las fases 4 y 6 se completan cuando esté disponible la copia de pruebas.
 

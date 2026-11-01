@@ -1,60 +1,60 @@
-ï»¿[OK] Base eliminada para empezar de cero: foodstore_movil.db
-[OK] Esquema ejecutado: C:\Users\ferna\OneDrive\Documentos\UTN\TERCER semestre\Base de datos 2\tp_7_mongoDB-main\tp_7_mongoDB-main\TP8\food-store\movil\schema_sqlite.sql
-[PASS] 00 PRAGMA foreign_keys activo Ã”Ã‡Ã¶ esperado='1' actual=1
-[PASS] 01 Existen las cuatro tablas Ã”Ã‡Ã¶ esperado='4' actual=4
-[PASS] 02 producto_cache tiene las siete columnas mâ”œÂ¡nimas Ã”Ã‡Ã¶ esperado='7' actual=7
-[PASS] 03 Las cuatro tablas son STRICT Ã”Ã‡Ã¶ esperado='4' actual=4
-[PASS] 04 item_borrador tiene dos claves forâ”œÃ­neas Ã”Ã‡Ã¶ esperado='2' actual=2
-[PASS] 05 cola_sync tiene una clave forâ”œÃ­nea Ã”Ã‡Ã¶ esperado='1' actual=1
-[PASS] 06 Cargar catâ”œÃ­logo de prueba Ã”Ã‡Ã¶ OK
-[PASS] 07 El catâ”œÃ­logo completo tiene siete productos Ã”Ã‡Ã¶ esperado='7' actual=7
-[PASS] 08 C1 devuelve solo productos disponibles y no eliminados Ã”Ã‡Ã¶ esperado='5' actual=5
-[PASS] 09 C1 devuelve los nombres esperados en orden Ã”Ã‡Ã¶ esperado='Agua 500ml,Alfajor,Gaseosa 1.5L,Pan artesanal,Queso 500g' actual='Agua 500ml,Alfajor,Gaseosa 1.5L,Pan artesanal,Queso 500g'
-[PASS] 10 C1 excluye el producto sin stock y el dado de baja Ã”Ã‡Ã¶ esperado='0' actual=0
-[PASS] 11 Abrir transacciâ”œâ”‚n del borrador Ã”Ã‡Ã¶ OK
-[PASS] 12 Insertar pedido_borrador Ã”Ã‡Ã¶ OK
-[PASS] 13 Insertar primer â”œÂ¡tem del borrador Ã”Ã‡Ã¶ OK
-[PASS] 14 Insertar segundo â”œÂ¡tem del borrador Ã”Ã‡Ã¶ OK
-[PASS] 15 Insertar la solicitud en la cola (PENDIENTE, sin motivo) Ã”Ã‡Ã¶ OK
-[PASS] 16 Confirmar la transacciâ”œâ”‚n Ã”Ã‡Ã¶ OK
-[PASS] 17 Quedâ”œâ”‚ un borrador Ã”Ã‡Ã¶ esperado='1' actual=1
-[PASS] 18 Quedaron dos â”œÂ¡tems Ã”Ã‡Ã¶ esperado='2' actual=2
-[PASS] 19 Quedâ”œâ”‚ una solicitud en la cola Ã”Ã‡Ã¶ esperado='1' actual=1
-[PASS] 20 Total del borrador en centavos = 2.200,50 Ã”Ã‡Ã¶ esperado='220050' actual=220050
-[PASS] 21 Abrir transacciâ”œâ”‚n que se va a deshacer Ã”Ã‡Ã¶ OK
-[PASS] 22 Insertar un segundo borrador (se deshace) Ã”Ã‡Ã¶ OK
-[PASS] 23 Insertar un â”œÂ¡tem del segundo borrador (se deshace) Ã”Ã‡Ã¶ OK
-[PASS] 24 Insertar la solicitud del segundo borrador (se deshace) Ã”Ã‡Ã¶ OK
-[PASS] 25 Deshacer la transacciâ”œâ”‚n Ã”Ã‡Ã¶ OK
-[PASS] 26 Sigue habiendo un solo borrador Ã”Ã‡Ã¶ esperado='1' actual=1
-[PASS] 27 Siguen habiendo dos â”œÂ¡tems Ã”Ã‡Ã¶ esperado='2' actual=2
-[PASS] 28 Sigue habiendo una sola solicitud Ã”Ã‡Ã¶ esperado='1' actual=1
-[PASS] 29 C7 abrir transacciâ”œâ”‚n de prueba Ã”Ã‡Ã¶ OK
-[PASS] 30 C7 cantidad 0 debe fallar por CHECK Ã”Ã‡Ã¶ error esperado: IntegrityError: CHECK constraint failed: cantidad > 0
-[PASS] 31 C7 producto inexistente debe fallar por FK Ã”Ã‡Ã¶ error esperado: IntegrityError: FOREIGN KEY constraint failed
-[PASS] 32 C7 cerrar transacciâ”œâ”‚n de prueba Ã”Ã‡Ã¶ OK
-[PASS] 33 C7 no dejâ”œâ”‚ filas nuevas: siguen dos â”œÂ¡tems Ã”Ã‡Ã¶ esperado='2' actual=2
-[PASS] 34 C7 no dejâ”œâ”‚ filas nuevas en el borrador 1 Ã”Ã‡Ã¶ esperado='2' actual=2
-[PASS] 35 Precio negativo debe fallar Ã”Ã‡Ã¶ error esperado: IntegrityError: CHECK constraint failed: precio_centavos >= 0
-[PASS] 36 Precio con texto debe fallar por STRICT Ã”Ã‡Ã¶ error esperado: IntegrityError: cannot store TEXT value in INTEGER column producto_cache.precio_centavos
-[PASS] 37 disponible y eliminado no pueden ser 1 a la vez Ã”Ã‡Ã¶ error esperado: IntegrityError: CHECK constraint failed: NOT (disponible = 1 AND eliminado = 1)
-[PASS] 38 disponible fuera de 0/1 debe fallar Ã”Ã‡Ã¶ error esperado: IntegrityError: CHECK constraint failed: disponible IN (0, 1)
-[PASS] 39 Sigue habiendo siete productos Ã”Ã‡Ã¶ esperado='7' actual=7
-[PASS] 40 Forma de pago invâ”œÃ­lida debe fallar Ã”Ã‡Ã¶ error esperado: IntegrityError: CHECK constraint failed: forma_pago IN ('EFECTIVO', 'TARJETA', 'TRANSFERENCIA')
-[PASS] 41 Usuario con email debe fallar (no viajan datos personales) Ã”Ã‡Ã¶ error esperado: IntegrityError: CHECK constraint failed: length(trim(usuario)) > 0 AND usuario NOT LIKE '%@%'
-[PASS] 42 id_local que no es UUID debe fallar Ã”Ã‡Ã¶ error esperado: IntegrityError: CHECK constraint failed: id_local GLOB '????????-????-????-????-????????????'
-[PASS] 43 Sigue habiendo un solo borrador Ã”Ã‡Ã¶ esperado='1' actual=1
-[PASS] 44 â”œÃ¬tem duplicado (mismo borrador y producto) debe fallar por PK Ã”Ã‡Ã¶ error esperado: IntegrityError: UNIQUE constraint failed: item_borrador.id_local, item_borrador.producto_id
-[PASS] 45 â”œÃ¬tem de un borrador inexistente debe fallar por FK Ã”Ã‡Ã¶ error esperado: IntegrityError: FOREIGN KEY constraint failed
-[PASS] 46 Siguen habiendo dos â”œÂ¡tems Ã”Ã‡Ã¶ esperado='2' actual=2
-[PASS] 47 Abrir transacciâ”œâ”‚n de pruebas de cola Ã”Ã‡Ã¶ OK
-[PASS] 48 Crear un borrador vâ”œÃ­lido para las pruebas de cola Ã”Ã‡Ã¶ OK
-[PASS] 49 Estado invâ”œÃ­lido en cola_sync debe fallar Ã”Ã‡Ã¶ error esperado: IntegrityError: CHECK constraint failed: estado IN ('PENDIENTE', 'CONFLICTO', 'RECHAZADO', 'SIMULADO_APROBADO')
-[PASS] 50 Estado final sin motivo debe fallar Ã”Ã‡Ã¶ error esperado: IntegrityError: CHECK constraint failed: estado = 'PENDIENTE' OR (motivo IS NOT NULL AND length(trim(motivo)) > 0)
-[PASS] 51 Reenviar el mismo solicitud_uuid debe fallar por PK (C6) Ã”Ã‡Ã¶ error esperado: IntegrityError: UNIQUE constraint failed: cola_sync.solicitud_uuid
-[PASS] 52 Cerrar transacciâ”œâ”‚n de pruebas de cola Ã”Ã‡Ã¶ OK
-[PASS] 53 Sigue habiendo una sola solicitud en la cola Ã”Ã‡Ã¶ esperado='1' actual=1
-[PASS] 54 Estado final: 7 productos, 1 borrador, 2 â”œÂ¡tems, 1 solicitud Ã”Ã‡Ã¶ esperado='7,1,2,1' actual='7,1,2,1'
+[OK] Base eliminada para empezar de cero: foodstore_movil.db
+[OK] Esquema ejecutado: <ruta_anonimizada>\schema_sqlite.sql
+[PASS] 00 PRAGMA foreign_keys activo ÔÇö esperado='1' actual=1
+[PASS] 01 Existen las cuatro tablas ÔÇö esperado='4' actual=4
+[PASS] 02 producto_cache tiene las siete columnas m+¡nimas ÔÇö esperado='7' actual=7
+[PASS] 03 Las cuatro tablas son STRICT ÔÇö esperado='4' actual=4
+[PASS] 04 item_borrador tiene dos claves for+íneas ÔÇö esperado='2' actual=2
+[PASS] 05 cola_sync tiene una clave for+ínea ÔÇö esperado='1' actual=1
+[PASS] 06 Cargar cat+ílogo de prueba ÔÇö OK
+[PASS] 07 El cat+ílogo completo tiene siete productos ÔÇö esperado='7' actual=7
+[PASS] 08 C1 devuelve solo productos disponibles y no eliminados ÔÇö esperado='5' actual=5
+[PASS] 09 C1 devuelve los nombres esperados en orden ÔÇö esperado='Agua 500ml,Alfajor,Gaseosa 1.5L,Pan artesanal,Queso 500g' actual='Agua 500ml,Alfajor,Gaseosa 1.5L,Pan artesanal,Queso 500g'
+[PASS] 10 C1 excluye el producto sin stock y el dado de baja ÔÇö esperado='0' actual=0
+[PASS] 11 Abrir transacci+¦n del borrador ÔÇö OK
+[PASS] 12 Insertar pedido_borrador ÔÇö OK
+[PASS] 13 Insertar primer +¡tem del borrador ÔÇö OK
+[PASS] 14 Insertar segundo +¡tem del borrador ÔÇö OK
+[PASS] 15 Insertar la solicitud en la cola (PENDIENTE, sin motivo) ÔÇö OK
+[PASS] 16 Confirmar la transacci+¦n ÔÇö OK
+[PASS] 17 Qued+¦ un borrador ÔÇö esperado='1' actual=1
+[PASS] 18 Quedaron dos +¡tems ÔÇö esperado='2' actual=2
+[PASS] 19 Qued+¦ una solicitud en la cola ÔÇö esperado='1' actual=1
+[PASS] 20 Total del borrador en centavos = 2.200,50 ÔÇö esperado='220050' actual=220050
+[PASS] 21 Abrir transacci+¦n que se va a deshacer ÔÇö OK
+[PASS] 22 Insertar un segundo borrador (se deshace) ÔÇö OK
+[PASS] 23 Insertar un +¡tem del segundo borrador (se deshace) ÔÇö OK
+[PASS] 24 Insertar la solicitud del segundo borrador (se deshace) ÔÇö OK
+[PASS] 25 Deshacer la transacci+¦n ÔÇö OK
+[PASS] 26 Sigue habiendo un solo borrador ÔÇö esperado='1' actual=1
+[PASS] 27 Siguen habiendo dos +¡tems ÔÇö esperado='2' actual=2
+[PASS] 28 Sigue habiendo una sola solicitud ÔÇö esperado='1' actual=1
+[PASS] 29 C7 abrir transacci+¦n de prueba ÔÇö OK
+[PASS] 30 C7 cantidad 0 debe fallar por CHECK ÔÇö error esperado: IntegrityError: CHECK constraint failed: cantidad > 0
+[PASS] 31 C7 producto inexistente debe fallar por FK ÔÇö error esperado: IntegrityError: FOREIGN KEY constraint failed
+[PASS] 32 C7 cerrar transacci+¦n de prueba ÔÇö OK
+[PASS] 33 C7 no dej+¦ filas nuevas: siguen dos +¡tems ÔÇö esperado='2' actual=2
+[PASS] 34 C7 no dej+¦ filas nuevas en el borrador 1 ÔÇö esperado='2' actual=2
+[PASS] 35 Precio negativo debe fallar ÔÇö error esperado: IntegrityError: CHECK constraint failed: precio_centavos >= 0
+[PASS] 36 Precio con texto debe fallar por STRICT ÔÇö error esperado: IntegrityError: cannot store TEXT value in INTEGER column producto_cache.precio_centavos
+[PASS] 37 disponible y eliminado no pueden ser 1 a la vez ÔÇö error esperado: IntegrityError: CHECK constraint failed: NOT (disponible = 1 AND eliminado = 1)
+[PASS] 38 disponible fuera de 0/1 debe fallar ÔÇö error esperado: IntegrityError: CHECK constraint failed: disponible IN (0, 1)
+[PASS] 39 Sigue habiendo siete productos ÔÇö esperado='7' actual=7
+[PASS] 40 Forma de pago inv+ílida debe fallar ÔÇö error esperado: IntegrityError: CHECK constraint failed: forma_pago IN ('EFECTIVO', 'TARJETA', 'TRANSFERENCIA')
+[PASS] 41 Usuario con email debe fallar (no viajan datos personales) ÔÇö error esperado: IntegrityError: CHECK constraint failed: length(trim(usuario)) > 0 AND usuario NOT LIKE '%@%'
+[PASS] 42 id_local que no es UUID debe fallar ÔÇö error esperado: IntegrityError: CHECK constraint failed: id_local GLOB '????????-????-????-????-????????????'
+[PASS] 43 Sigue habiendo un solo borrador ÔÇö esperado='1' actual=1
+[PASS] 44 +ìtem duplicado (mismo borrador y producto) debe fallar por PK ÔÇö error esperado: IntegrityError: UNIQUE constraint failed: item_borrador.id_local, item_borrador.producto_id
+[PASS] 45 +ìtem de un borrador inexistente debe fallar por FK ÔÇö error esperado: IntegrityError: FOREIGN KEY constraint failed
+[PASS] 46 Siguen habiendo dos +¡tems ÔÇö esperado='2' actual=2
+[PASS] 47 Abrir transacci+¦n de pruebas de cola ÔÇö OK
+[PASS] 48 Crear un borrador v+ílido para las pruebas de cola ÔÇö OK
+[PASS] 49 Estado inv+ílido en cola_sync debe fallar ÔÇö error esperado: IntegrityError: CHECK constraint failed: estado IN ('PENDIENTE', 'CONFLICTO', 'RECHAZADO', 'SIMULADO_APROBADO')
+[PASS] 50 Estado final sin motivo debe fallar ÔÇö error esperado: IntegrityError: CHECK constraint failed: estado = 'PENDIENTE' OR (motivo IS NOT NULL AND length(trim(motivo)) > 0)
+[PASS] 51 Reenviar el mismo solicitud_uuid debe fallar por PK (C6) ÔÇö error esperado: IntegrityError: UNIQUE constraint failed: cola_sync.solicitud_uuid
+[PASS] 52 Cerrar transacci+¦n de pruebas de cola ÔÇö OK
+[PASS] 53 Sigue habiendo una sola solicitud en la cola ÔÇö esperado='1' actual=1
+[PASS] 54 Estado final: 7 productos, 1 borrador, 2 +¡tems, 1 solicitud ÔÇö esperado='7,1,2,1' actual='7,1,2,1'
 
 ========================================================================
 RESUMEN: 55 PASS, 0 FAIL, 55 pruebas
