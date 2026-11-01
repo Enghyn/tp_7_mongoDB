@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Informe final — TP8 Food Store</title>
+<style>
+  @page { size: A4; margin: 0; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 10pt;
+    line-height: 1.35;
+    color: #1a1a2e;
+    margin: 0;
+  }
+  .page { padding: 16mm 15mm; }
+  h1 { font-size: 17pt; margin: 0 0 2mm; color: #16324f; }
+  h2 { font-size: 12.5pt; margin: 6mm 0 2mm; color: #16324f; border-bottom: 1.5px solid #16324f; padding-bottom: 1mm; }
+  h3 { font-size: 10.5pt; margin: 3.5mm 0 1.5mm; color: #2a4d69; }
+  p { margin: 1.5mm 0; text-align: justify; }
+  ul, ol { margin: 1mm 0 2mm; padding-left: 5mm; }
+  li { margin: 0.6mm 0; }
+  table { border-collapse: collapse; width: 100%; margin: 2mm 0 3mm; font-size: 8.5pt; break-inside: avoid; }
+  tr { break-inside: avoid; }
+  h2, h3 { break-after: avoid; }
+  th, td { border: 0.5pt solid #9fb3c8; padding: 1.1mm 1.6mm; text-align: left; vertical-align: top; }
+  th { background: #eef3f8; color: #16324f; }
+  code { font-family: Consolas, "Courier New", monospace; font-size: 8.5pt; background: #f0f3f7; padding: 0 0.8mm; border-radius: 2px; }
+  .regla {
+    border-left: 3px solid #16324f; background: #eef3f8;
+    padding: 2mm 3mm; margin: 2mm 0 3mm; font-style: italic;
+  }
+  .meta { color: #444; font-size: 9pt; margin-bottom: 3mm; }
+  .portada {
+    border: 1pt solid #16324f; border-radius: 3px;
+    padding: 3mm 4mm; margin-bottom: 3mm; background: #f7fafc;
+  }
+  .firma { color: #555; font-size: 8.5pt; font-style: italic; margin-top: 4mm; }
+  strong { color: #12283d; }
+</style>
+</head>
+<body>
+
+<!-- ==================== PÁGINA 1 ==================== -->
+<div class="page">
+  <div class="portada">
+    <h1>Informe final — TP8 Food Store: cierre de la capa de datos</h1>
+    <p class="meta">
+      <strong>Materia:</strong> Base de Datos II — Tecnicatura Universitaria en Programación<br>
+      <strong>Proyecto:</strong> Food Store — PostgreSQL (servidor, fuente de verdad) + MongoDB (proyección de lectura) + SQLite (tablet móvil)<br>
+      <strong>Fecha:</strong> 2026-11-01
+    </p>
+  </div>
+
+  <h2>1. Objetivo y proyecto</h2>
+  <p>Este informe cierra la capa de datos del sistema Food Store. El proyecto opera en tres escenarios de base de datos sobre un mismo negocio: <strong>PostgreSQL</strong> como sistema transaccional del servidor y única fuente de verdad (200.000 pedidos, 700.410 detalles, 50.000 productos, 20.000 clientes); <strong>MongoDB</strong> como proyección de lectura del subconjunto pedidos + detalle (5 pedidos de prueba, líneas embebidas <code>lineas[]</code>); y <strong>SQLite</strong> en la tablet de venta en feria, que trabaja sin señal y guarda una copia mínima del catálogo más borradores de venta.</p>
+  <div class="regla">"El móvil propone, el servidor dispone. La tablet solo consulta y arma borradores. Precio, stock y ventas los decide PostgreSQL. <code>SIMULADO_APROBADO</code> no es una venta."</div>
+
+  <h3>Qué hace cada motor</h3>
+  <table>
+    <tr><th>Motor</th><th>Rol</th><th>Qué guarda</th></tr>
+    <tr><td>PostgreSQL</td><td><strong>Fuente de verdad</strong> (ACID)</td><td>Clientes, categorías, productos, pedidos, ventas confirmadas</td></tr>
+    <tr><td>MongoDB</td><td>Proyección de lectura</td><td>Colección <code>pedidos</code> con líneas embebidas; consultas sin <code>JOIN</code></td></tr>
+    <tr><td>SQLite (tablet)</td><td>Copia + borradores</td><td><code>producto_cache</code>, <code>pedido_borrador</code>, <code>item_borrador</code>, <code>cola_sync</code> (4 tablas STRICT)</td></tr>
+  </table>
+
+  <h2>2. Diseño de la capa de datos</h2>
+  <h3>2.1 Qué viaja a la tablet</h3>
+  <p>La tablet necesita operar offline, pero el TP8 prohíbe datos personales en SQLite; por eso viaja solo el catálogo mínimo para armar un borrador.</p>
+  <table>
+    <tr><th>Dato</th><th>¿Viaja?</th><th>En SQLite</th><th>Motivo</th></tr>
+    <tr><td><code>id_producto</code></td><td>Sí</td><td><code>producto_cache.id</code></td><td>Relaciona el borrador con el catálogo</td></tr>
+    <tr><td><code>nombre</code></td><td>Sí</td><td><code>nombre</code></td><td>Mostrar el producto al vendedor</td></tr>
+    <tr><td><code>precio_lista</code></td><td>Sí</td><td><code>precio_centavos INTEGER</code></td><td>Centavos enteros, no float; es "precio visto", no oficial</td></tr>
+    <tr><td><code>stock</code></td><td>Sí</td><td><code>stock_visto</code></td><td>Foto del momento, no reserva</td></tr>
+    <tr><td><code>activo</code></td><td>Sí</td><td><code>eliminado</code> (0/1)</td><td>Baja lógica</td></tr>
+    <tr><td>Fecha de copia</td><td>Sí</td><td><code>fecha_copia</code></td><td>Detectar snapshot desactualizado</td></tr>
+    <tr><td>Clientes, credenciales, historial de pedidos, categorías</td><td><strong>No</strong></td><td>—</td><td>Datos personales o innecesarios; riesgo de exposición en un dispositivo que puede perderse</td></tr>
+  </table>
+  <p><strong>La fuente de verdad es PostgreSQL:</strong> la tablet nunca escribe precio ni stock en el servidor.</p>
+
+  <h3>2.2 Mapeo PostgreSQL → SQLite</h3>
+  <table>
+    <tr><th>PostgreSQL</th><th>SQLite (<code>producto_cache</code>)</th><th>Regla</th></tr>
+    <tr><td><code>id_producto</code></td><td><code>id</code></td><td>Identificador original</td></tr>
+    <tr><td><code>nombre</code></td><td><code>nombre</code></td><td>Texto no vacío</td></tr>
+    <tr><td><code>precio_lista NUMERIC(10,2)</code></td><td><code>precio_centavos INTEGER</code></td><td><code>ROUND(precio_lista * 100)::bigint</code>; nunca float</td></tr>
+    <tr><td><code>stock INTEGER</code></td><td><code>stock_visto INTEGER</code></td><td>Solo lectura; <code>&gt;= 0</code></td></tr>
+    <tr><td><code>stock &gt; 0 AND activo</code></td><td><code>disponible INTEGER</code></td><td><code>0</code>/<code>1</code></td></tr>
+    <tr><td><code>NOT activo</code></td><td><code>eliminado INTEGER</code></td><td><code>0</code>/<code>1</code> (baja lógica)</td></tr>
+    <tr><td>Fecha de exportación</td><td><code>fecha_copia TEXT</code></td><td>ISO 8601</td></tr>
+  </table>
+</div>
+
+<!-- ==================== PÁGINA 2 ==================== -->
+<div class="page">
+  <h3>2.3 Snapshot con booleanos t/f y staging</h3>
+  <p>La vista <code>v_snapshot_movil</code> (PostgreSQL) se exporta a CSV con <code>psql</code>; en ese CSV los booleanos salen como <code>t</code>/<code>f</code>. La carga se hace en dos etapas: 1) <code>snapshot_servidor</code>, tabla de <strong>staging</strong> con tipos flexibles que absorbe el CSV tal como viene; 2) <code>producto_cache</code>, cargado con <code>CASE WHEN ... IN ('t','true','1') THEN 1 ELSE 0 END</code> y <code>CAST</code> a <code>INTEGER</code>.</p>
+  <p>Nunca se importa directo a <code>producto_cache</code>: es STRICT y sus <code>CHECK (disponible IN (0,1))</code> rechazarían <code>t</code>/<code>f</code>. El precio viaja en <strong>centavos enteros</strong> para evitar los errores de representación de punto flotante; SQLite STRICT rechaza un texto en una columna <code>INTEGER</code>.</p>
+
+  <h3>2.4 Semáforo e idempotencia en la tablet</h3>
+  <p>El semáforo (<code>semaforo.sql</code>) evalúa solo solicitudes en estado <code>PENDIENTE</code> contra el snapshot:</p>
+  <table>
+    <tr><th>Color</th><th>Estado</th><th>Regla</th></tr>
+    <tr><td>Rojo</td><td><code>RECHAZADO</code></td><td>Producto inexistente, no disponible, eliminado o stock insuficiente</td></tr>
+    <tr><td>Amarillo</td><td><code>CONFLICTO</code></td><td>No hay rojo, pero cambió algún precio</td></tr>
+    <tr><td>Verde</td><td><code>SIMULADO_APROBADO</code></td><td>Todo coincide</td></tr>
+  </table>
+  <p><strong>Idempotencia:</strong> repetir la simulación no reevalúa (las solicitudes ya no están <code>PENDIENTE</code>) y la PK <code>solicitud_uuid</code> de <code>cola_sync</code> impide duplicados. En un sistema real, la protección vive del lado servidor: clave de idempotencia única + <code>ON CONFLICT</code> + log de solicitudes.</p>
+
+  <h2>3. Implementación y evidencia</h2>
+  <p><strong>Entorno:</strong> el CLI de <code>sqlite3</code> no está instalado; los entregables son SQL puro y el arnés <code>run_pruebas.py</code> (Python 3.14 + SQLite 3.50.4, con soporte STRICT) los ejecuta. <code>PRAGMA foreign_keys = ON</code> se fuerza en cada conexión porque es un ajuste por conexión, no persistente en el archivo.</p>
+
+  <h3>3.1 Cuatro tablas STRICT (Consigna 1)</h3>
+  <p><code>schema_sqlite.sql</code> crea 4 tablas STRICT con CHECK y claves foráneas: <code>producto_cache</code> (precio en centavos entero y no negativo, <code>disponible</code>/<code>eliminado</code> solo 0/1 y nunca ambos 1), <code>pedido_borrador</code> (<code>forma_pago</code> limitada a EFECTIVO/TARJETA/TRANSFERENCIA, usuario sin email, <code>id_local</code> tipo UUID), <code>item_borrador</code> (2 claves foráneas, <code>cantidad &gt; 0</code>) y <code>cola_sync</code> (PK <code>solicitud_uuid</code>, 4 estados, estado final exige motivo).</p>
+
+  <h3>3.2 Pruebas: 55 PASS, 0 FAIL</h3>
+  <p><code>python run_pruebas.py --db foodstore_movil.db --fresh</code> → <strong>55 PASS, 0 FAIL</strong> (2026-11-01, evidencia en <code>movil/salida_pruebas.txt</code>). Cubren:</p>
+  <ul>
+    <li><strong>C1:</strong> catálogo disponible sin servidor (5 productos de prueba: Agua 500ml, Alfajor, Gaseosa 1.5L, Pan artesanal, Queso 500g).</li>
+    <li><strong>Borrador con <code>BEGIN … COMMIT</code>:</strong> total exacto de 220.050 centavos = $2.200,50; y operación deshecha con <code>ROLLBACK</code> sin filas residuales.</li>
+    <li><strong>C7:</strong> cantidad <code>0</code> (CHECK) y producto inexistente (FK) fallan sin dejar filas nuevas.</li>
+    <li><strong>Triangulación:</strong> precio negativo, texto en columna <code>INTEGER</code>, booleanos fuera de 0/1, forma de pago inválida, UUID inválido, ítem duplicado (PK) y <code>solicitud_uuid</code> repetido (C6).</li>
+  </ul>
+</div>
+
+<!-- ==================== PÁGINA 3 ==================== -->
+<div class="page">
+  <h3>3.3 Carga del snapshot (Consigna 2.a)</h3>
+  <p><code>v_snapshot_movil</code> verificada en PostgreSQL (modo single-user): <strong>50.000 filas</strong> sin errores. CSV <code>servidor_snapshot.csv</code>: 50.001 líneas (1 encabezado + 50.000 datos). Resultado de <code>run_cargar_snapshot.py</code>:</p>
+  <table>
+    <tr><th>Métrica</th><th>Valor</th></tr>
+    <tr><td>Total productos en <code>producto_cache</code></td><td><strong>50.000</strong></td></tr>
+    <tr><td>Disponibles (<code>disponible=1, eliminado=0</code>)</td><td><strong>44.732</strong></td></tr>
+    <tr><td>Eliminados (baja lógica)</td><td><strong>5.061</strong></td></tr>
+    <tr><td>Rango de precios (centavos)</td><td>50.012 – 499.996</td></tr>
+    <tr><td>Rango de stock visto</td><td>0 – 200</td></tr>
+  </table>
+
+  <h3>3.4 Semáforo: casos C2–C6 (Consignas 2.b y 2.c)</h3>
+  <p>Ejecutados con <code>python simular_casos.py --db foodstore_movil.db</code>:</p>
+  <table>
+    <tr><th>Caso</th><th>Escenario</th><th>Resultado real</th></tr>
+    <tr><td>C2</td><td>Cambio de precio del producto 3 (178.065 → 190.000 centavos)</td><td><strong>CONFLICTO</strong>; al aceptar el nuevo precio la reevaluación da <strong>SIMULADO_APROBADO</strong></td></tr>
+    <tr><td>C3</td><td>Solicitar 200 unidades con stock visto de 137</td><td><strong>RECHAZADO</strong> — Stock insuficiente</td></tr>
+    <tr><td>C4</td><td>Producto dado de baja (<code>eliminado=1, disponible=0</code>)</td><td><strong>RECHAZADO</strong>; la fila permanece en <code>producto_cache</code> (baja lógica, sin DELETE)</td></tr>
+    <tr><td>C5</td><td>Sin cambios en snapshot ni borrador</td><td><strong>SIMULADO_APROBADO</strong> — Todo coincide</td></tr>
+    <tr><td>C6</td><td>Reenviar la misma <code>solicitud_uuid</code></td><td>Error de PK (<code>UNIQUE constraint failed</code>); repetir la simulación no reevalúa — idempotencia</td></tr>
+  </table>
+  <p>El borrador de prueba original quedó <code>RECHAZADO — Producto no disponible</code>: el producto 2 tiene <code>disponible=0</code> y <code>stock_visto=0</code> en el snapshot real, lo que demuestra que el semáforo compara contra datos reales, no sintéticos.</p>
+
+  <h3>3.5 Verificación de no modificación en PostgreSQL</h3>
+  <p>Consulta final sobre <code>tp_food_store</code>: <strong>200.000 pedidos</strong>, <strong>700.410 detalles</strong>, y los productos 1–3 idénticos al snapshot (stock/activo/precio comprobados uno por uno: p. ej. producto 3 = stock 137, activo, 1.780,65 = 178.065 centavos). La simulación es de <strong>solo lectura</strong>: ningún stock descontado, ningún precio cambiado, ninguna venta confirmada.</p>
+
+  <h3>3.6 MongoDB (proyección de lectura)</h3>
+  <p>Colección <code>pedidos</code> con <strong>5 documentos</strong> (<code>_id</code> Long 1–5), validador <code>$jsonSchema</code> activo y 6 índices. Permite consultar pedidos completos con líneas embebidas sin <code>JOIN</code>; no es fuente de verdad ni participa de la sincronización con la tablet.</p>
+
+  <h2>4. Plan de mantenimiento y code review con IA</h2>
+  <h3>4.1 Plan de mantenimiento (resumen)</h3>
+  <ul>
+    <li><strong>Respaldo:</strong> PostgreSQL diario con <code>pg_dump</code> (verificación por conteos contra 200.000/50.000/20.000); MongoDB semanal con <code>mongodump</code> (verificación: 5 documentos, 6 índices, validador activo); SQLite por tablet al cierre de cada jornada (copiar el <code>.db</code> y <code>PRAGMA integrity_check</code>).</li>
+    <li><strong>Restauración de un respaldo viejo:</strong> las tablets <strong>re-sincronizan siempre</strong> el catálogo, el semáforo reevalúa los borradores <code>PENDIENTE</code>/<code>CONFLICTO</code> y los <code>SIMULADO_APROBADO</code> no se envían automáticamente.</li>
+    <li><strong>Revisión de <code>CONFLICTO</code>/<code>RECHAZADO</code>:</strong> al cierre de cada jornada, por el vendedor (sus solicitudes) y el administrador (todas las tablets); toda acción queda registrada en <code>cola_sync</code> como historial.</li>
+  </ul>
+</div>
+
+<!-- ==================== PÁGINA 4 ==================== -->
+<div class="page">
+  <h3>4.2 Code review con IA: 4 hallazgos (2 corregidos, 1 aceptado, 1 descartado)</h3>
+  <p>Revisión con IA (OpenCode) sobre todos los scripts de la cursada (TP7 y TP8). Por regla de la consigna, al menos un hallazgo debía descartarse con fundamento (no se acepta todo lo que dice la IA):</p>
+  <table>
+    <tr><th>#</th><th>Script</th><th>Hallazgo</th><th>Decisión</th></tr>
+    <tr><td>1</td><td><code>migracion_mongodb.js</code> (TP7)</td><td>No idempotente: reejecutar falla por <code>_id</code> duplicado (E11000) y <code>NamespaceAlreadyExists</code>; el <code>db.pedidos.drop()</code> está comentado</td><td><strong>Corregido</strong></td></tr>
+    <tr><td>2</td><td><code>consultas_postgresql.sql</code> (TP7)</td><td>La equivalencia PostgreSQL↔MongoDB se verificó solo sobre los 5 pedidos de prueba, no sobre los 200.000 reales</td><td><strong>Aceptado</strong> (observación válida sobre el alcance)</td></tr>
+    <tr><td>3</td><td><code>semaforo.sql</code> (TP8)</td><td>Un borrador <strong>sin ítems</strong> caería en el <code>ELSE</code> y quedaría <code>SIMULADO_APROBADO</code>: una orden vacía no debe aprobarse; ninguna de las 55 pruebas lo cubría</td><td><strong>Corregido</strong></td></tr>
+    <tr><td>4</td><td><code>cargar_snapshot.sql</code> (TP8)</td><td><code>DELETE FROM producto_cache</code> con FKs activas fallaría si <code>item_borrador</code> referencia productos</td><td><strong>Descartado con fundamento</strong></td></tr>
+  </table>
+  <p><strong>Fundamento del descarte (hallazgo 4):</strong> es una restricción de uso documentada, no un bug. El propio <code>cargar_snapshot.sql</code> indica que debe ejecutarse vía <code>run_cargar_snapshot.py</code>, que desactiva las FKs justo antes del <code>DELETE FROM producto_cache</code> (líneas 83–85 del arnés) y las reactiva después. El flujo previsto ya resuelve el caso.</p>
+  <p><strong>Verificación:</strong> cada hallazgo se contrastó con las bases reales (MongoDB: 5 documentos con <code>_id</code> 1–5; SQLite: esquema y evidencia de las 55 pruebas; PostgreSQL: inspección de scripts y documentación). La bitácora <code>bitacora_ia.md</code> registra qué se aceptó y qué se descartó en cada interacción con la IA, y <code>DUIA.md</code> declara: todo código generado con IA fue leído, comprendido y probado; todo lo que no se puede explicar en la defensa cuenta como no hecho.</p>
+
+  <h2>5. Conclusiones y mejoras futuras</h2>
+  <p><strong>Mandato cumplido:</strong> la arquitectura respeta la regla de oro. La tablet opera offline con una foto de solo lectura del catálogo y propone borradores; el semáforo local da una primera evaluación (rojo/amarillo/verde), pero la palabra final siempre es de PostgreSQL, donde se confirma la venta y se descuenta stock.</p>
+  <p><strong>Evidencia clave:</strong> 55 PASS / 0 FAIL sobre 4 tablas STRICT; snapshot real de 50.000 productos (44.732 disponibles, 5.061 eliminados) sincronizado vía vista → CSV → staging → <code>producto_cache</code>; los 5 estados del semáforo comprobados con los casos C2–C6 (<code>CONFLICTO</code>, <code>RECHAZADO</code> ×2, <code>SIMULADO_APROBADO</code>, idempotencia por PK); PostgreSQL intacto tras la simulación (200.000 pedidos, 700.410 detalles).</p>
+  <p><strong>Mejoras futuras:</strong></p>
+  <ol>
+    <li><strong>Idempotencia real del lado servidor:</strong> implementar en PostgreSQL la clave de idempotencia derivada de <code>solicitud_uuid</code> con <code>ON CONFLICT</code> y log de solicitudes, dentro de la misma transacción que descuenta stock. La garantía actual vive solo en SQLite.</li>
+    <li><strong>Validación de borrador no vacío en el esquema</strong> (continuidad del hallazgo 3) y cobertura del caso en <code>pruebas_sqlite.sql</code>.</li>
+    <li><strong>Reejecución idempotente de la migración a MongoDB</strong> (hallazgo 1: descomentar <code>drop()</code> o envolver la creación en try/catch).</li>
+    <li><strong>Re-sincronización incremental</strong> del snapshot y señal de "resync" del servidor hacia las tablets, formalizando el procedimiento del plan de mantenimiento.</li>
+  </ol>
+  <p class="firma">Informe generado el 2026-11-01. Todas las cifras corresponden a ejecuciones reales documentadas en <code>docs/evidencias_consigna1.md</code> y <code>docs/evidencias_consigna2.md</code>.</p>
+</div>
+
+</body>
+</html>
