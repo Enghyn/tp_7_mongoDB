@@ -181,7 +181,24 @@ db.createCollection("pedidos", {
 
 ---
 
-## 8. Resumen
+## 9. Consigna 3 — Reglas de integridad y justificación del embebido
+
+### 9.1 Reglas de integridad conservadas
+
+1. **Cantidad positiva** (`cantidad > 0`): En PostgreSQL se define como `CHECK (cantidad > 0)` en `detalle_pedido`. En MongoDB se conserva mediante `$jsonSchema` con `cantidad: { bsonType: "int", minimum: 1 }` en el validador de la colección `pedidos`. Garantiza que no existan líneas con cantidad cero o negativa.
+
+2. **Precio unitario no negativo** (`precio_unitario_facturado >= 0`): En PostgreSQL se define como `CHECK (precio_unitario_facturado >= 0)` en `detalle_pedido`. En MongoDB se conserva mediante `$jsonSchema` con `precio_unitario_facturado: { bsonType: "decimal", minimum: 0 }`. Garantiza que no existan precios negativos.
+
+### 9.2 Justificación: qué se embebió y qué quedó como referencia
+
+- **Embebido en el documento:** Los campos de `pedido` (id_cliente, fecha_pedido, forma_pago, estado) y las líneas de `detalle_pedido` (id_producto, cantidad, precio_unitario_facturado, subtotal) se incluyen dentro del mismo documento de la colección `pedidos`, en el arreglo `lineas[]`.
+- **NO embebido (referencias por identificador):** Los datos de `cliente` (nombre, email, teléfono) y `producto` (nombre, precio_lista, stock, categoría) NO se embeben. Se conservan únicamente sus identificadores (`id_cliente`, `lineas[].id_producto`) como referencias lógicas.
+- **Justificación del embebido de líneas:** Las líneas de detalle no tienen vida independiente fuera de su pedido; siempre se consultan junto con él. El arreglo está acotado (2–5 elementos por pedido), muy lejos del límite de 16 MB por documento. Embeber evita JOINs y transacciones multi-documento, haciendo la lectura/escritura del pedido completo atómica.
+- **Justificación de NO embeber cliente ni producto:** Tienen ciclo de vida propio y se comparten entre múltiples pedidos (un cliente realiza varios pedidos; un producto aparece en varios pedidos). Embeberlos duplicaría datos y dificultaría su actualización. Además, el alcance de esta migración se limita al subconjunto pedidos + líneas.
+
+---
+
+## 8. Resumen"
 
 | Concepto | Resultado |
 |---|---|
