@@ -71,7 +71,20 @@ conn.close()
 # Esperado: 200000
 ```
 
+
 ---
+
+## Integrantes del equipo
+
+| Nombre | 
+|--------|
+| Enzo Giaquinta |
+| Agustin Contardi |
+| Fernando Torrez |
+| Ramiro Salcedo |
+| Ignacio Sanchez |
+
+------
 
 ## Estructura del proyecto
 
